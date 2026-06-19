@@ -510,7 +510,7 @@
             document.getElementById(`btn-sub-${subId}`).classList.add('active');
         }
 
-        // --- MERCADO GLOBAL ---
+        // --- MERCADO GLOBAL (RANKING FIXADO) ---
         function updateLiveMarketData() {
             const prices = {
                 eu: (70 + Math.random() * 5).toFixed(2),
@@ -526,8 +526,51 @@
                 <div class="card-price"><h3>Mercado Voluntário</h3><div class="price">US$ ${prices.voluntary}</div><div class="update-time">Atualizado às ${now}</div></div>
             `;
         }
+
+        const companiesData = [
+            { name: "Global Tech Inc.", sector: "Tecnologia / Data Centers", baseVol: 4500000, investment: "US$ 67.5M" },
+            { name: "Euro Airways", sector: "Aviação Comercial", baseVol: 3800000, investment: "US$ 57.0M" },
+            { name: "Trans-Pacific Logistics", sector: "Marítimo / Transportes", baseVol: 2900000, investment: "US$ 43.5M" },
+            { name: "MegaSteel Group", sector: "Siderurgia", baseVol: 2100000, investment: "US$ 31.5M" },
+            { name: "Heavens Automotive", sector: "Automotivo (Combustão)", baseVol: 1750000, investment: "US$ 26.2M" }
+        ];
+
+        function renderRanking() {
+            const tbody = document.getElementById('ranking-table');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+            
+            companiesData.forEach((comp, index) => {
+                const dynamicVolume = comp.baseVol + Math.floor(Math.random() * 1200);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="rank-badge">${index + 1}</span></td>
+                    <td><strong>${comp.name}</strong></td>
+                    <td>${comp.sector}</td>
+                    <td>${dynamicVolume.toLocaleString('pt-BR')} tCO₂e</td>
+                    <td>${comp.investment}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
         setInterval(updateLiveMarketData, 4000);
+        setInterval(renderRanking, 6000);
         updateLiveMarketData();
+        renderRanking();
+
+        // --- ANÚNCIOS PADRÃO (BACKUP) ---
+        const anunciosPadrao = [
+            { titulo: "Área de Preservação Amazônica", preco: "R$ 5.200.000", loc: "Sinop - MT", tam: "1.100 ha", desc_texto: "Mata nativa intacta com documentação 100% regularizada no CAR e GEO. Pronta para auditoria ambiental.", foto: "" },
+            { titulo: "Gleba para Crédito de Carbono", preco: "R$ 1.980.000", loc: "Formosa - GO", tam: "420 ha", desc_texto: "Bioma Cerrado com alto potencial de retenção de biomassa. Ideal para compensação florestal.", foto: "" }
+        ];
+
+        // --- RECLAMAÇÕES PADRÃO (BACKUP) ---
+        const reclamacoesPadrao = [
+            { title: "Créditos falsos comprados em área de desmatamento ativo", company: "MegaSteel Group", category: "Greenwashing", text_content: "Verificamos através de dados de satélite que a floresta de onde derivam os créditos comprados pela empresa foi queimada no mês passado.", status: "nao-respondido", status_text: "Não Respondida" },
+            { title: "Propaganda de neutralidade de carbono irreal", company: "Euro Airways", category: "Greenwashing", text_content: "A empresa alega voos 100% ecológicos, mas usa compensações baratas de projetos de energia renovável antigos, violando a nova diretiva global.", status: "pendente", status_text: "Em Réplica" },
+            { title: "Dupla contagem resolvida com auditoria", company: "Global Tech Inc.", category: "Dupla Contagem", text_content: "Haviam emitido o mesmo lote de créditos para o servidor americano e europeu. Após notificação, a empresa cancelou as redundâncias.", status: "resolvido", status_text: "Resolvido" }
+        ];
 
         // --- SISTEMA DE TERRENOS COM SUPABASE ---
         let imagemCarregadaBase64 = "";
@@ -550,8 +593,11 @@
                 return;
             }
 
+            // Se o banco estiver vazio, junta os dados padrão para o site não sumir com tudo
+            const listaExibicao = terrenos.length > 0 ? terrenos : anunciosPadrao;
+
             container.innerHTML = "";
-            terrenos.forEach(ad => {
+            listaExibicao.forEach(ad => {
                 let blocoImagem = ad.foto ? `<img src="${ad.foto}" alt="Foto">` : `<div class="sem-foto">🌳<br>Foto não enviada</div>`;
                 container.innerHTML += `
                     <div class="card-anuncio">
@@ -605,8 +651,11 @@
                 return;
             }
 
-            window.todasReclamacoes = reclamacoes; 
-            renderizarListaFiltrada(reclamacoes);
+            // Se o banco estiver vazio, exibe as reclamações padrão
+            const listaExibicao = reclamacoes.length > 0 ? reclamacoes : reclamacoesPadrao;
+
+            window.todasReclamacoes = listaExibicao; 
+            renderizarListaFiltrada(listaExibicao);
         }
 
         function renderizarListaFiltrada(lista) {
