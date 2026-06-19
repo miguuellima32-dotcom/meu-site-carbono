@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarbonMarket | Dashboard, Classificados & Ouvidoria</title>
+    <title>CarbonMarket | Dashboard & Ouvidoria</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #10b981;
@@ -49,21 +50,16 @@
             color: var(--primary);
         }
 
-        nav {
-            display: flex;
-            gap: 10px;
-        }
-
         nav button {
             background: none;
             border: none;
             color: white;
             font-size: 1rem;
+            margin-left: 1.5rem;
             cursor: pointer;
             padding: 0.5rem 1rem;
             transition: 0.3s;
             border-radius: 5px;
-            font-weight: 500;
         }
 
         nav button.active, nav button:hover {
@@ -85,7 +81,7 @@
             display: block;
         }
 
-        /* Dashboard Styles */
+        /* Dashboard */
         .grid-prices {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -118,9 +114,9 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
+            0 { opacity: 0.5; }
+            50 { opacity: 1; }
+            100 { opacity: 0.5; }
         }
 
         .card-price h3 {
@@ -136,19 +132,18 @@
             color: var(--dark);
         }
 
-        .card-price .update-status {
+        .card-price .update-time {
             font-size: 0.75rem;
             color: var(--primary-dark);
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
-        /* Table & Ranking Styles */
         .section-title {
             margin-bottom: 1rem;
             font-size: 1.4rem;
             color: var(--dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .table-container {
@@ -198,7 +193,7 @@
         tr:nth-child(3) .rank-badge { background-color: #b45309; }
         tr:nth-child(n+4) .rank-badge { background-color: var(--gray); }
 
-        /* Classificados Styles */
+        /* Terrenos */
         .olx-box { background: white; padding: 2rem; border-radius: 10px; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .btn-sub { padding: 0.75rem 1.5rem; font-weight: bold; border: 2px solid #10b981; border-radius: 5px; cursor: pointer; margin-right: 10px; transition: 0.2s; background: white; color: #10b981; }
         .btn-sub.active, .btn-sub:hover { background: #10b981; color: white; }
@@ -207,11 +202,17 @@
         .sub-page.active { display: block; }
 
         .grid-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
-        .card-anuncio { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card-anuncio { background: white; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .img-container { width: 100%; height: 180px; background-color: #cbd5e1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .sem-foto { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; font-size: 0.9rem; font-weight: 500; text-align: center; padding: 1rem; }
+        
+        .card-conteudo { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         .card-anuncio h4 { font-size: 1.2rem; color: #0f172a; margin-bottom: 0.5rem; }
         .card-anuncio .preco { font-size: 1.4rem; font-weight: bold; color: #047857; margin-bottom: 0.5rem; }
 
-        /* Reclame Aqui Styles */
+        /* Reclame Verde */
         .ra-header {
             background: white;
             padding: 2rem;
@@ -355,10 +356,10 @@
 <body>
 
     <header>
-        <h1>🌱 Eco<span>Carbon</span> Live</h1>
+        <h1>🌱 Eco<span>Carbon</span></h1>
         <nav>
-            <button onclick="switchPage('dashboard')" id="nav-dashboard" class="active">Painel de Preços</button>
-            <button onclick="switchPage('classificados')" id="nav-classificados">Classificados de Áreas</button>
+            <button onclick="switchPage('dashboard')" id="nav-dashboard" class="active">Mercado Global</button>
+            <button onclick="switchPage('terrenos')" id="nav-terrenos">Terrenos</button>
             <button onclick="switchPage('reclame')" id="nav-reclame">Reclame Verde</button>
         </nav>
     </header>
@@ -367,18 +368,19 @@
         
         <main id="page-dashboard" class="page active">
             <div class="section-title">
-                <h2>Cotações Oficiais da API Global (Banco Mundial)</h2>
+                <h2>Preços Atuais do Carbono (tCO₂e)</h2>
             </div>
             
             <div class="grid-prices" id="prices-grid">
-                <div class="card-price"><h3>Sistema União Europeia (EU ETS)</h3><div class="price" id="price-eu">Carregando...</div><div class="update-status">🟢 Conectado</div></div>
-                <div class="card-price"><h3>Mercado da Califórnia (CCA)</h3><div class="price" id="price-cali">Carregando...</div><div class="update-status">🟢 Conectado</div></div>
-                <div class="card-price"><h3>Mercado da Nova Zelândia</h3><div class="price" id="price-nz">Carregando...</div><div class="update-status">🟢 Conectado</div></div>
-                <div class="card-price"><h3>RGGI (EUA Oriental)</h3><div class="price" id="price-rggi">Carregando...</div><div class="update-status">🟢 Conectado</div></div>
+                <div class="card-price"><h3>União Europeia (EUA)</h3><div class="price">Carregando...</div></div>
+                <div class="card-price"><h3>Reino Unido (UK)</h3><div class="price">Carregando...</div></div>
+                <div class="card-price"><h3>Califórnia (CCA)</h3><div class="price">Carregando...</div></div>
+                <div class="card-price"><h3>Mercado Voluntário</h3><div class="price">Carregando...</div></div>
             </div>
 
             <div class="section-title">
-                <h2>Ranking de Compras Corporativas Acumuladas</h2>
+                <h2>Ranking dos Maiores Compradores Recentes</h2>
+                <small style="color: var(--gray)">Atualizado dinamicamente</small>
             </div>
 
             <div class="table-container">
@@ -386,9 +388,10 @@
                     <thead>
                         <tr>
                             <th>Posição</th>
-                            <th>Empresa / Compradora</th>
-                            <th>Créditos Adquiridos (tCO₂e)</th>
-                            <th>Status de Compensação</th>
+                            <th>Empresa / Corporação</th>
+                            <th>Setor Industrial</th>
+                            <th>Volume Comprado (Créditos / tCO₂e)</th>
+                            <th>Investimento Estimado</th>
                         </tr>
                     </thead>
                     <tbody id="ranking-table">
@@ -397,7 +400,7 @@
             </div>
         </main>
 
-        <section id="page-classificados" class="page">
+        <section id="page-terrenos" class="page">
             <div class="olx-box">
                 <h2>Balcão de Negócios de Áreas</h2>
                 <p style="color: var(--gray); margin-bottom: 1rem;">Negocie terrenos focados em preservação ambiental e créditos de carbono.</p>
@@ -420,6 +423,7 @@
                         <div class="form-group"><label>Preço (R$)</label><input type="text" id="prec-anuncio" placeholder="Ex: R$ 2.500.000" required></div>
                         <div class="form-group"><label>Localização</label><input type="text" id="loc-anuncio" placeholder="Ex: Sorocaba - SP" required></div>
                         <div class="form-group"><label>Tamanho (Hectares)</label><input type="text" id="tam-anuncio" placeholder="Ex: 500 ha" required></div>
+                        <div class="form-group"><label>Foto do Terreno</label><input type="file" id="foto-anuncio" accept="image/*" onchange="carregarImagem(event)"></div>
                         <div class="form-group"><label>Descrição</label><textarea id="desc-anuncio" rows="3" placeholder="Detalhes sobre bioma, documentação..." required></textarea></div>
                         <button type="submit" style="background: var(--primary); color: white; border: none; padding: 0.75rem; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer;">Publicar Anúncio</button>
                     </form>
@@ -432,37 +436,50 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <div>
                         <h2>Reclame Verde</h2>
-                        <p style="color: var(--gray)">Canal público contra Greenwashing do mercado de carbono.</p>
+                        <p style="color: var(--gray)">Plataforma de denúncias contra Greenwashing e irregularidades de créditos de carbono.</p>
                     </div>
                     <button class="btn-reclamar" onclick="toggleModal(true)">Fazer Reclamação</button>
                 </div>
+
                 <div class="ra-tabs">
                     <button class="ra-tab active" onclick="filterComplaints('todas', this)">Todas</button>
                     <button class="ra-tab" onclick="filterComplaints('resolvido', this)">Resolvidas</button>
-                    <button class="ra-tab" onclick="filterComplaints('pendente', this)">Em Análise</button>
+                    <button class="ra-tab" onclick="filterComplaints('pendente', this)">Em Réplica</button>
                     <button class="ra-tab" onclick="filterComplaints('nao-respondido', this)">Não Respondidas</button>
                 </div>
             </div>
-            <div id="complaints-list"></div>
+
+            <div id="complaints-list">
+            </div>
         </section>
     </div>
 
     <div class="modal" id="complaint-modal">
         <div class="modal-content">
-            <h3>Nova Denúncia</h3>
-            <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 1.5rem;">Ajude a manter o mercado de carbono transparente.</p>
+            <h3>Registrar Nova Reclamação</h3>
+            <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 1.5rem;">Sua denúncia ajuda a manter o mercado de carbono transparente.</p>
             <form id="complaint-form" onsubmit="submitComplaint(event)">
-                <div class="form-group"><label>Título</label><input type="text" id="form-title" required placeholder="Ex: Crédito fantasma detectado"></div>
-                <div class="form-group"><label>Empresa Acusada</label><input type="text" id="form-company" required placeholder="Ex: Empresa X"></div>
+                <div class="form-group">
+                    <label>Título da Reclamação</label>
+                    <input type="text" id="form-title" required placeholder="Ex: Crédito fantasma detectado">
+                </div>
+                <div class="form-group">
+                    <label>Empresa Acusada</label>
+                    <input type="text" id="form-company" required placeholder="Ex: Multinacional de Petróleo X">
+                </div>
                 <div class="form-group">
                     <label>Tipo de Irregularidade</label>
                     <select id="form-category">
                         <option value="Greenwashing">Greenwashing / Propaganda Enganosa</option>
                         <option value="Dupla Contagem">Dupla Contagem de Créditos</option>
-                        <option value="Terras Irregulares">Projetos em áreas sem consentimento</option>
+                        <option value="Ameaça à comunidade">Projetos em Terras Indígenas sem consentimento</option>
+                        <option value="Outros">Outros</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Relato Completo</label><textarea id="form-text" rows="4" required placeholder="Descreva os fatos detalhadamente..."></textarea></div>
+                <div class="form-group">
+                    <label>Relato Completo</label>
+                    <textarea id="form-text" rows="4" required placeholder="Explique os detalhes da sua denúncia..."></textarea>
+                </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="toggleModal(false)">Cancelar</button>
                     <button type="submit" class="btn-reclamar">Publicar Reclamação</button>
@@ -472,165 +489,190 @@
     </div>
 
     <script>
-        // --- GERENCIADOR DE PÁGINAS PRINCIPAIS ---
+        // CONFIGURAÇÃO DO SUPABASE
+        const SUPABASE_URL = "https://krccolhleyjmqnoddack.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_krfMJPMsWsqhtB-Y4JhNUg_CEBYclAD";
+
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- GERENCIADOR DE PÁGINAS ---
         function switchPage(pageId) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
-            
             document.getElementById(`page-${pageId}`).classList.add('active');
             document.getElementById(`nav-${pageId}`).classList.add('active');
         }
 
-        // --- SUB-ABAS DOS CLASSIFICADOS ---
         function switchSub(subId) {
             document.querySelectorAll('.sub-page').forEach(sp => sp.classList.remove('active'));
             document.querySelectorAll('.btn-sub').forEach(btn => btn.classList.remove('active'));
-            
             document.getElementById(`sub-${subId}`).classList.add('active');
             document.getElementById(`btn-sub-${subId}`).classList.add('active');
         }
 
-        // --- DADOS DO MERCADO (DASHBOARD) ---
+        // --- MERCADO GLOBAL ---
         function updateLiveMarketData() {
             const prices = {
-                eu: (74.20 + Math.random() * 3).toFixed(2),
-                cali: (39.50 + Math.random() * 1.5).toFixed(2),
-                nz: (48.10 + Math.random() * 2).toFixed(2),
-                rggi: (16.35 + Math.random() * 0.8).toFixed(2)
+                eu: (70 + Math.random() * 5).toFixed(2),
+                uk: (62 + Math.random() * 4).toFixed(2),
+                california: (38 + Math.random() * 2).toFixed(2),
+                voluntary: (8 + Math.random() * 3).toFixed(2)
             };
+            const now = new Date().toLocaleTimeString();
+            document.getElementById('prices-grid').innerHTML = `
+                <div class="card-price"><h3>União Europeia (EUA)</h3><div class="price">€ ${prices.eu}</div><div class="update-time">Atualizado às ${now}</div></div>
+                <div class="card-price"><h3>Reino Unido (UK)</h3><div class="price">£ ${prices.uk}</div><div class="update-time">Atualizado às ${now}</div></div>
+                <div class="card-price"><h3>Califórnia (CCA)</h3><div class="price">US$ ${prices.california}</div><div class="update-time">Atualizado às ${now}</div></div>
+                <div class="card-price"><h3>Mercado Voluntário</h3><div class="price">US$ ${prices.voluntary}</div><div class="update-time">Atualizado às ${now}</div></div>
+            `;
+        }
+        setInterval(updateLiveMarketData, 4000);
+        updateLiveMarketData();
 
-            document.getElementById('price-eu').innerText = `€ ${prices.eu}`;
-            document.getElementById('price-cali').innerText = `US$ ${prices.cali}`;
-            document.getElementById('price-nz').innerText = `NZ$ ${prices.nz}`;
-            document.getElementById('price-rggi').innerText = `US$ ${prices.rggi}`;
+        // --- SISTEMA DE TERRENOS COM SUPABASE ---
+        let imagemCarregadaBase64 = "";
+
+        function carregarImagem(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onloadend = function() { imagemCarregadaBase64 = reader.result; }
+            if (file) reader.readAsDataURL(file);
         }
 
-        const companiesData = [
-            { name: "Global Tech Inc.", vol: "4.501.200 tCO₂e", status: "Compensado 100%" },
-            { name: "Euro Airways", vol: "3.800.450 tCO₂e", status: "Pendente Auditoria" },
-            { name: "Trans-Pacific Logistics", vol: "2.900.110 tCO₂e", status: "Compensado 50%" },
-            { name: "MegaSteel Group", vol: "2.100.000 tCO₂e", status: "Em Análise" }
-        ];
-
-        function renderRanking() {
-            const tbody = document.getElementById('ranking-table');
-            tbody.innerHTML = "";
-            companiesData.forEach((comp, index) => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td><span class="rank-badge">${index + 1}</span></td>
-                        <td><strong>${comp.name}</strong></td>
-                        <td>${comp.vol}</td>
-                        <td><span style="color: var(--primary-dark); font-weight:600;">${comp.status}</span></td>
-                    </tr>
-                `;
-            });
-        }
-
-        // --- SISTEMA DOS CLASSIFICADOS ---
-        let dadosAnuncios = [
-            { titulo: "Área de Preservação Amazônica", preco: "R$ 5.200.000", loc: "Sinop - MT", tam: "1.100 ha", desc: "Mata nativa intacta com documentação 100% regularizada no CAR e GEO. Pronta para auditoria ambiental." },
-            { titulo: "Gleba para Crédito de Carbono", preco: "R$ 1.980.000", loc: "Formosa - GO", tam: "420 ha", desc: "Bioma Cerrado com alto potencial de retenção de biomassa. Ideal para compensação florestal." }
-        ];
-
-        function renderizarAnuncios() {
+        async function carregarAnunciosDoBanco() {
             const container = document.getElementById('lista-anuncios');
+            container.innerHTML = "<p style='padding:1rem; color:var(--gray);'>Carregando terrenos salvos na nuvem...</p>";
+            
+            const { data: terrenos, error } = await _supabase.from('terrenos').select('*').order('id', { ascending: false });
+            
+            if (error) {
+                container.innerHTML = "<p style='padding:1rem; color:var(--danger);'>Erro ao carregar anúncios.</p>";
+                return;
+            }
+
             container.innerHTML = "";
-            dadosAnuncios.forEach(ad => {
+            terrenos.forEach(ad => {
+                let blocoImagem = ad.foto ? `<img src="${ad.foto}" alt="Foto">` : `<div class="sem-foto">🌳<br>Foto não enviada</div>`;
                 container.innerHTML += `
                     <div class="card-anuncio">
-                        <div class="preco">${ad.preco}</div>
-                        <h4>${ad.titulo}</h4>
-                        <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">📍 ${ad.loc} • 📏 ${ad.tam}</p>
-                        <p style="font-size: 0.9rem; color: #334155;">${ad.desc}</p>
-                        <button style="margin-top: 1rem; width: 100%; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 5px; cursor: pointer; font-weight: bold;" onclick="alert('Conexão com o vendedor simulada com sucesso!')">Contatar Vendedor</button>
+                        <div class="img-container">${blocoImagem}</div>
+                        <div class="card-conteudo">
+                            <div>
+                                <div class="preco">${ad.preco}</div>
+                                <h4>${ad.titulo}</h4>
+                                <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">📍 ${ad.loc} • 📏 ${ad.tam}</p>
+                                <p style="font-size: 0.9rem; color: #334155;">${ad.desc_texto}</p>
+                            </div>
+                            <button style="margin-top: 1rem; width: 100%; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 5px; cursor: pointer; font-weight: bold;" onclick="alert('Conexão simulada!')">Contatar Vendedor</button>
+                        </div>
                     </div>
                 `;
             });
         }
 
-        function salvarAnuncio(event) {
+        async function salvarAnuncio(event) {
             event.preventDefault();
-            const novo = {
+            const novoAnuncio = {
                 titulo: document.getElementById('tit-anuncio').value,
                 preco: document.getElementById('prec-anuncio').value,
                 loc: document.getElementById('loc-anuncio').value,
                 tam: document.getElementById('tam-anuncio').value,
-                desc: document.getElementById('desc-anuncio').value
+                desc_texto: document.getElementById('desc-anuncio').value,
+                foto: imagemCarregadaBase64
             };
-            dadosAnuncios.unshift(novo);
-            renderizarAnuncios();
-            event.target.reset();
-            switchSub('compre');
+
+            const { error } = await _supabase.from('terrenos').insert([novoAnuncio]);
+            
+            if (error) {
+                alert("Erro ao salvar no Supabase: " + error.message);
+            } else {
+                event.target.reset();
+                imagemCarregadaBase64 = "";
+                switchSub('compre');
+                carregarAnunciosDoBanco();
+            }
         }
 
-        // --- SISTEMA RECLAME VERDE ---
-        let complaints = [
-            { id: 1, title: "Créditos falsos comprados em área de desmatamento ativo", company: "MegaSteel Group", category: "Greenwashing", text: "Verificamos através de dados de satélite que a floresta de onde derivam os créditos comprados foi queimada recentemente.", status: "nao-respondido", statusText: "Não Respondida", date: "Há 2 horas" },
-            { id: 2, title: "Propaganda de neutralidade de carbono irreal", company: "Euro Airways", category: "Greenwashing", text: "A empresa alega voos ecológicos com base em créditos redundantes de projetos antigos obsoletos.", status: "pendente", statusText: "Em Análise", date: "Ontem" },
-            { id: 3, title: "Dupla contagem corrigida após auditoria", company: "Global Tech Inc.", category: "Dupla Contagem", text: "Haviam emitido o mesmo lote para dois servidores. Após notificação interna, a redundância foi cancelada.", status: "resolvido", statusText: "Resolvido", date: "Há 3 dias" }
-        ];
-
-        function renderComplaints(filter = 'todas') {
+        // --- RECLAME VERDE COM SUPABASE ---
+        async function carregarReclamacoesDoBanco() {
             const listContainer = document.getElementById('complaints-list');
-            listContainer.innerHTML = "";
-            const filtered = complaints.filter(c => filter === 'todas' || c.status === filter);
+            listContainer.innerHTML = "<p style='padding:1rem; text-align:center; color:var(--gray);'>Carregando denúncias...</p>";
 
-            if(filtered.length === 0) {
-                listContainer.innerHTML = `<p style="text-align:center; padding: 2rem; color: var(--gray);">Nenhuma denúncia encontrada nesta categoria.</p>`;
+            const { data: reclamacoes, error } = await _supabase.from('reclamacoes').select('*').order('id', { ascending: false });
+
+            if (error) {
+                listContainer.innerHTML = "<p style='padding:1rem; text-align:center; color:var(--danger);'>Erro ao carregar ouvidoria.</p>";
                 return;
             }
 
-            filtered.forEach(c => {
-                listContainer.innerHTML += `
-                    <div class="complaint-card status-${c.status}">
-                        <div class="complaint-header">
-                            <span class="complaint-title">${c.title}</span>
-                            <span class="badge-status ${c.status}">${c.statusText}</span>
-                        </div>
-                        <div class="complaint-meta">Contra <strong>${c.company}</strong> | Tipo: ${c.category} | ${c.date}</div>
-                        <p style="font-size: 0.95rem; color: #334155;">${c.text}</p>
+            window.todasReclamacoes = reclamacoes; 
+            renderizarListaFiltrada(reclamacoes);
+        }
+
+        function renderizarListaFiltrada(lista) {
+            const listContainer = document.getElementById('complaints-list');
+            listContainer.innerHTML = "";
+
+            if (lista.length === 0) {
+                listContainer.innerHTML = `<p style="text-align:center; padding: 2rem; color: var(--gray);">Nenhuma denúncia encontrada.</p>`;
+                return;
+            }
+
+            lista.forEach(c => {
+                const div = document.createElement('div');
+                div.className = `complaint-card status-${c.status}`;
+                div.innerHTML = `
+                    <div class="complaint-header">
+                        <span class="complaint-title">${c.title}</span>
+                        <span class="badge-status ${c.status}">${c.status_text}</span>
                     </div>
+                    <div class="complaint-meta">Reclamação contra <strong>${c.company}</strong> | Tipo: ${c.category}</div>
+                    <p style="font-size: 0.95rem; color: #334155;">${c.text_content}</p>
                 `;
+                listContainer.appendChild(div);
             });
         }
 
         function filterComplaints(status, btnElement) {
             document.querySelectorAll('.ra-tab').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
-            renderComplaints(status);
+            
+            if (!window.todasReclamacoes) return;
+            const filtradas = status === 'todas' ? window.todasReclamacoes : window.todasReclamacoes.filter(c => c.status === status);
+            renderizarListaFiltrada(filtradas);
+        }
+
+        async function submitComplaint(event) {
+            event.preventDefault();
+            const novaReclamacao = {
+                title: document.getElementById('form-title').value,
+                company: document.getElementById('form-company').value,
+                category: document.getElementById('form-category').value,
+                text_content: document.getElementById('form-text').value,
+                status: "nao-respondido",
+                status_text: "Não Respondida"
+            };
+
+            const { error } = await _supabase.from('reclamacoes').insert([novaReclamacao]);
+
+            if (error) {
+                alert("Erro ao enviar denúncia: " + error.message);
+            } else {
+                toggleModal(false);
+                document.getElementById('complaint-form').reset();
+                carregarReclamacoesDoBanco();
+            }
         }
 
         function toggleModal(show) {
             const modal = document.getElementById('complaint-modal');
-            if(show) modal.classList.add('active');
+            if (show) modal.classList.add('active');
             else modal.classList.remove('active');
         }
 
-        function submitComplaint(event) {
-            event.preventDefault();
-            const newComplaint = {
-                id: complaints.length + 1,
-                title: document.getElementById('form-title').value,
-                company: document.getElementById('form-company').value,
-                category: document.getElementById('form-category').value,
-                text: document.getElementById('form-text').value,
-                status: "nao-respondido",
-                statusText: "Não Respondida",
-                date: "Agora mesmo"
-            };
-            complaints.unshift(newComplaint);
-            renderComplaints();
-            toggleModal(false);
-            document.getElementById('complaint-form').reset();
-        }
-
-        // --- INICIALIZAÇÃO DE ROTINAS ---
-        setInterval(updateLiveMarketData, 4000);
-        updateLiveMarketData();
-        renderRanking();
-        renderizarAnuncios();
-        renderComplaints();
+        // Inicialização
+        carregarAnunciosDoBanco();
+        carregarReclamacoesDoBanco();
     </script>
 </body>
 </html>
