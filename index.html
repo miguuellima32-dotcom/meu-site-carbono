@@ -594,7 +594,7 @@
                 if (!error && data) terrenos = data;
             } catch (e) { console.log(e); }
 
-            // JUNTA os seus anúncios do banco + os anúncios fictícios originais (com foto)
+            // Junta os seus novos anúncios salvos no Supabase com os anúncios fictícios originais
             const listaExibicao = [...terrenos, ...anunciosPadrao];
 
             container.innerHTML = "";
@@ -651,7 +651,7 @@
                 if (!error && data) reclamacoes = data;
             } catch(e) { console.log(e); }
 
-            // JUNTA denúncias criadas online + denúncias antigas padrão
+            // Sempre exibe as denúncias padrão + o que foi criado online
             const listaExibicao = [...reclamacoes, ...reclamacoesPadrao];
 
             window.todasReclamacoes = listaExibicao; 
@@ -705,13 +705,11 @@
 
             try {
                 const { error } = await _supabase.from('reclamacoes').insert([novaReclamacao]);
-                if (error) { console.log("Salvando localmente devido a tabela ausente"); }
             } catch(e) {}
 
             toggleModal(false);
             document.getElementById('complaint-form').reset();
             
-            // Adiciona localmente caso queira testar na hora sem a tabela criada
             if(!window.todasReclamacoes) window.todasReclamacoes = [];
             window.todasReclamacoes.unshift(novaReclamacao);
             renderizarListaFiltrada(window.todasReclamacoes);
@@ -723,7 +721,7 @@
             else modal.classList.remove('active');
         }
 
-        // Inicialização global ao abrir a página
+        // Inicialização global ao carregar a página completamente
         window.onload = function() {
             updateLiveMarketData();
             renderRanking();
@@ -731,60 +729,5 @@
             carregarReclamacoesDoBanco();
         };
     </script>
-    <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarbonMarket | Dashboard & Admin</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --primary: #10b981;
-            --primary-dark: #047857;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --gray: #64748b;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --success: #10b981;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f1f5f9;
-            color: var(--dark);
-        }
-
-        header {
-            background-color: var(--dark);
-            color: white;
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 4px solid var(--primary);
-        }
-
-        header h1 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.8rem;
-        }
-
-        header span {
-            color: var(--primary);
-        }
-
-        nav {
-            display: flex;
-            align-items: center;
 </body>
 </html>
