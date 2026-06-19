@@ -37,6 +37,8 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 4px solid var(--primary);
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     header h1 {
@@ -73,13 +75,8 @@
       padding: 0 1rem;
     }
 
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-    }
+    .page { display: none; }
+    .page.active { display: block; }
 
     .grid-prices {
       display: grid;
@@ -143,6 +140,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .table-container {
@@ -217,13 +216,8 @@
       color: white;
     }
 
-    .sub-page {
-      display: none;
-    }
-
-    .sub-page.active {
-      display: block;
-    }
+    .sub-page { display: none; }
+    .sub-page.active { display: block; }
 
     .grid-produtos {
       display: grid;
@@ -331,6 +325,7 @@
       gap: 10px;
       border-bottom: 2px solid #e2e8f0;
       margin-bottom: 1.5rem;
+      flex-wrap: wrap;
     }
 
     .ra-tab {
@@ -379,6 +374,7 @@
     .complaint-header {
       display: flex;
       justify-content: space-between;
+      gap: 1rem;
       margin-bottom: 0.5rem;
     }
 
@@ -393,6 +389,7 @@
       font-size: 0.8rem;
       font-weight: bold;
       color: white;
+      white-space: nowrap;
     }
 
     .badge-status.resolvido { background-color: var(--success); }
@@ -413,6 +410,7 @@
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      padding: 1rem;
     }
 
     .modal.active { display: flex; }
@@ -472,6 +470,12 @@
     .toast.show {
       display: block;
     }
+
+    .empty-state {
+      padding: 2rem;
+      text-align: center;
+      color: var(--gray);
+    }
   </style>
 </head>
 <body>
@@ -492,9 +496,9 @@
     </div>
 
     <div class="grid-prices" id="prices-grid">
-      <div class="card-price"><h3>União Europeia (EUA)</h3><div class="price">Carregando...</div></div>
-      <div class="card-price"><h3>Reino Unido (UK)</h3><div class="price">Carregando...</div></div>
-      <div class="card-price"><h3>Califórnia (CCA)</h3><div class="price">Carregando...</div></div>
+      <div class="card-price"><h3>União Europeia</h3><div class="price">Carregando...</div></div>
+      <div class="card-price"><h3>Reino Unido</h3><div class="price">Carregando...</div></div>
+      <div class="card-price"><h3>Califórnia</h3><div class="price">Carregando...</div></div>
       <div class="card-price"><h3>Mercado Voluntário</h3><div class="price">Carregando...</div></div>
     </div>
 
@@ -542,7 +546,7 @@
           <div class="form-group"><label>Preço (R$)</label><input type="text" id="prec-anuncio" required></div>
           <div class="form-group"><label>Localização</label><input type="text" id="loc-anuncio" required></div>
           <div class="form-group"><label>Tamanho (Hectares)</label><input type="text" id="tam-anuncio" required></div>
-          <div class="form-group"><label>Foto do Terreno</label><input type="file" id="foto-anuncio" accept="image/*" onchange="carregarImagem(event)"></div>
+          <div class="form-group"><label>Foto do Terreno</label><input type="file" id="foto-anuncio" accept="image/*"></div>
           <div class="form-group"><label>Descrição</label><textarea id="desc-anuncio" rows="3" required></textarea></div>
           <button type="submit" id="btn-salvar-texto" style="background: var(--primary); color: white; border: none; padding: 0.75rem; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer;">Publicar Anúncio</button>
           <button type="button" id="btn-cancelar-edicao" style="display:none; background: #e2e8f0; color: black; border: none; padding: 0.75rem; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px;" onclick="cancelarEdicao()">Cancelar Edição</button>
@@ -553,7 +557,7 @@
 
   <section id="page-reclame" class="page">
     <div class="ra-header">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;">
         <div>
           <h2>Reclame Verde</h2>
           <p style="color: var(--gray)">Plataforma de denúncias contra Greenwashing e irregularidades de créditos de carbono.</p>
@@ -612,7 +616,8 @@
 <script>
   const SUPABASE_URL = "https://krccolhleyjmqnoddack.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_krfMJPMsWsqhtB-Y4JhNUg_CEBYclAD";
-  const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { createClient } = supabase;
+  const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   let listaAnunciosLocal = [];
   let imagemCarregadaBase64 = "";
@@ -646,13 +651,13 @@
       california: (38 + Math.random() * 2).toFixed(2),
       voluntary: (8 + Math.random() * 3).toFixed(2)
     };
-    const now = new Date().toLocaleTimeString();
+    const now = new Date().toLocaleTimeString('pt-BR');
     const pricesGrid = document.getElementById('prices-grid');
     if (pricesGrid) {
       pricesGrid.innerHTML = `
-        <div class="card-price"><h3>União Europeia (EUA)</h3><div class="price">€ ${prices.eu}</div><div class="update-time">Atualizado às ${now}</div></div>
-        <div class="card-price"><h3>Reino Unido (UK)</h3><div class="price">£ ${prices.uk}</div><div class="update-time">Atualizado às ${now}</div></div>
-        <div class="card-price"><h3>Califórnia (CCA)</h3><div class="price">US$ ${prices.california}</div><div class="update-time">Atualizado às ${now}</div></div>
+        <div class="card-price"><h3>União Europeia</h3><div class="price">€ ${prices.eu}</div><div class="update-time">Atualizado às ${now}</div></div>
+        <div class="card-price"><h3>Reino Unido</h3><div class="price">£ ${prices.uk}</div><div class="update-time">Atualizado às ${now}</div></div>
+        <div class="card-price"><h3>Califórnia</h3><div class="price">US$ ${prices.california}</div><div class="update-time">Atualizado às ${now}</div></div>
         <div class="card-price"><h3>Mercado Voluntário</h3><div class="price">US$ ${prices.voluntary}</div><div class="update-time">Atualizado às ${now}</div></div>
       `;
     }
@@ -685,8 +690,42 @@
   }
 
   const anunciosPadrao = [
-    { id: "p1", titulo: "Área de Preservação Amazônica", preco: "R$ 5.200.000", loc: "Sinop - MT", tam: "1.100 ha", desc_texto: "Mata nativa intacta com documentação 100% regularizada no CAR e GEO.", foto: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=600&q=80" },
-    { id: "p2", titulo: "Gleba para Crédito de Carbono", preco: "R$ 1.980.000", loc: "Formosa - GO", tam: "420 ha", desc_texto: "Bioma Cerrado com alto potencial de retenção de biomassa.", foto: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80" }
+    {
+      id: "p1",
+      titulo: "Área de Preservação Amazônica",
+      preco: "R$ 5.200.000",
+      loc: "Sinop - MT",
+      tam: "1.100 ha",
+      desc_texto: "Mata nativa intacta com documentação 100% regularizada no CAR e GEO.",
+      foto: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      id: "p2",
+      titulo: "Gleba para Crédito de Carbono",
+      preco: "R$ 1.980.000",
+      loc: "Formosa - GO",
+      tam: "420 ha",
+      desc_texto: "Bioma Cerrado com alto potencial de retenção de biomassa.",
+      foto: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      id: "p3",
+      titulo: "Reserva Legal com Nascentes",
+      preco: "R$ 3.750.000",
+      loc: "Chapada Diamantina - BA",
+      tam: "680 ha",
+      desc_texto: "Área com nascentes, vegetação nativa preservada e forte apelo para conservação hídrica. Excelente para projetos de restauração e carbono.",
+      foto: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80"
+    },
+    {
+      id: "p4",
+      titulo: "Fazenda Sustentável com Mata Atlântica",
+      preco: "R$ 4.600.000",
+      loc: "Ilhéus - BA",
+      tam: "530 ha",
+      desc_texto: "Propriedade com área verde consolidada, potencial para turismo ecológico e geração de créditos de carbono com conservação permanente.",
+      foto: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80"
+    }
   ];
 
   const reclamacoesPadrao = [
@@ -697,15 +736,16 @@
 
   function carregarImagem(event) {
     const file = event.target.files[0];
+    if (!file) return;
     const reader = new FileReader();
     reader.onloadend = function() { imagemCarregadaBase64 = reader.result; };
-    if (file) reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
   }
 
   async function carregarAnunciosDoBanco() {
     const container = document.getElementById('lista-anuncios');
     if (!container) return;
-    container.innerHTML = "<p style='padding:1rem; color:var(--gray);'>Carregando terrenos...</p>";
+    container.innerHTML = "<p class='empty-state'>Carregando terrenos...</p>";
 
     let terrenos = [];
     try {
@@ -715,6 +755,11 @@
 
     listaAnunciosLocal = [...terrenos, ...anunciosPadrao];
     container.innerHTML = "";
+
+    if (listaAnunciosLocal.length === 0) {
+      container.innerHTML = "<p class='empty-state'>Nenhum terreno cadastrado.</p>";
+      return;
+    }
 
     listaAnunciosLocal.forEach(ad => {
       const blocoImagem = ad.foto
@@ -824,7 +869,7 @@
   async function carregarReclamacoesDoBanco() {
     const listContainer = document.getElementById('complaints-list');
     if (!listContainer) return;
-    listContainer.innerHTML = "<p style='padding:1rem; text-align:center; color:var(--gray);'>Carregando denúncias...</p>";
+    listContainer.innerHTML = "<p class='empty-state'>Carregando denúncias...</p>";
 
     let reclamacoes = [];
     try {
@@ -842,7 +887,7 @@
     listContainer.innerHTML = "";
 
     if (!lista || lista.length === 0) {
-      listContainer.innerHTML = `<p style="text-align:center; padding: 2rem; color: var(--gray);">Nenhuma denúncia encontrada.</p>`;
+      listContainer.innerHTML = `<p class="empty-state">Nenhuma denúncia encontrada.</p>`;
       return;
     }
 
@@ -866,12 +911,16 @@
     btnElement.classList.add('active');
 
     if (!window.todasReclamacoes) return;
-    const filtradas = status === 'todas' ? window.todasReclamacoes : window.todasReclamacoes.filter(c => c.status === status);
+    const filtradas = status === 'todas'
+      ? window.todasReclamacoes
+      : window.todasReclamacoes.filter(c => c.status === status);
+
     renderizarListaFiltrada(filtradas);
   }
 
   async function submitComplaint(event) {
     event.preventDefault();
+
     const novaReclamacao = {
       title: document.getElementById('form-title').value,
       company: document.getElementById('form-company').value,
@@ -884,12 +933,15 @@
     try {
       const { error } = await _supabase.from('reclamacoes').insert([novaReclamacao]);
       if (error) throw error;
-    } catch(e) {}
+      toast("Reclamação publicada com sucesso.");
+    } catch(e) {
+      toast("Reclamação salva apenas localmente.");
+    }
 
     toggleModal(false);
     document.getElementById('complaint-form').reset();
 
-    if(!window.todasReclamacoes) window.todasReclamacoes = [];
+    if (!window.todasReclamacoes) window.todasReclamacoes = [];
     window.todasReclamacoes.unshift(novaReclamacao);
     renderizarListaFiltrada(window.todasReclamacoes);
   }
@@ -908,24 +960,6 @@
     setInterval(updateLiveMarketData, 4000);
     setInterval(renderRanking, 6000);
   };
-id: "p3",
-    titulo: "Reserva Legal com Nascentes",
-    preco: "R$ 3.750.000",
-    loc: "Chapada Diamantina - BA",
-    tam: "680 ha",
-    desc_texto: "Área com nascentes, vegetação nativa preservada e forte apelo para conservação hídrica. Excelente para projetos de restauração e carbono.",
-    foto: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    id: "p4",
-    titulo: "Fazenda Sustentável com Mata Atlântica",
-    preco: "R$ 4.600.000",
-    loc: "Ilhéus - BA",
-    tam: "530 ha",
-    desc_texto: "Propriedade com área verde consolidada, potencial para turismo ecológico e geração de créditos de carbono com conservação permanente.",
-    foto: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80"
-  }
-];
 </script>
 </body>
 </html>
