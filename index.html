@@ -1,816 +1,913 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarbonMarket | Dashboard & Ouvidoria</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --primary: #10b981;
-            --primary-dark: #047857;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --gray: #64748b;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --success: #10b981;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarbonMarket | Dashboard & Ouvidoria</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #047857;
+      --dark: #0f172a;
+      --light: #f8fafc;
+      --gray: #64748b;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        body {
-            background-color: #f1f5f9;
-            color: var(--dark);
-        }
+    body {
+      background-color: #f1f5f9;
+      color: var(--dark);
+    }
 
-        header {
-            background-color: var(--dark);
-            color: white;
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 4px solid var(--primary);
-        }
+    header {
+      background-color: var(--dark);
+      color: white;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 4px solid var(--primary);
+    }
 
-        header h1 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.8rem;
-        }
+    header h1 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.8rem;
+    }
 
-        header span {
-            color: var(--primary);
-        }
+    header span {
+      color: var(--primary);
+    }
 
-        nav button {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1rem;
-            margin-left: 1.5rem;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            transition: 0.3s;
-            border-radius: 5px;
-        }
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      margin-left: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      transition: 0.3s;
+      border-radius: 5px;
+    }
 
-        nav button.active, nav button:hover {
-            background-color: var(--primary);
-            color: white;
-        }
+    nav button.active, nav button:hover {
+      background-color: var(--primary);
+      color: white;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
 
-        .page {
-            display: none;
-        }
+    .page {
+      display: none;
+    }
 
-        .page.active {
-            display: block;
-        }
+    .page.active {
+      display: block;
+    }
 
-        /* Dashboard */
-        .grid-prices {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
+    .grid-prices {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
 
-        .card-price {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            border-left: 5px solid var(--primary);
-            position: relative;
-            overflow: hidden;
-        }
+    .card-price {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      border-left: 5px solid var(--primary);
+      position: relative;
+      overflow: hidden;
+    }
 
-        .card-price::after {
-            content: "LIVE";
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 0.7rem;
-            background: var(--danger);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-weight: bold;
-            animation: pulse 2s infinite;
-        }
+    .card-price::after {
+      content: "LIVE";
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.7rem;
+      background: var(--danger);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: bold;
+      animation: pulse 2s infinite;
+    }
 
-        @keyframes pulse {
-            0 { opacity: 0.5; }
-            50 { opacity: 1; }
-            100 { opacity: 0.5; }
-        }
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
 
-        .card-price h3 {
-            font-size: 0.9rem;
-            color: var(--gray);
-            text-transform: uppercase;
-        }
+    .card-price h3 {
+      font-size: 0.9rem;
+      color: var(--gray);
+      text-transform: uppercase;
+    }
 
-        .card-price .price {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin: 0.5rem 0;
-            color: var(--dark);
-        }
+    .card-price .price {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin: 0.5rem 0;
+      color: var(--dark);
+    }
 
-        .card-price .update-time {
-            font-size: 0.75rem;
-            color: var(--primary-dark);
-        }
+    .card-price .update-time {
+      font-size: 0.75rem;
+      color: var(--primary-dark);
+    }
 
-        .section-title {
-            margin-bottom: 1rem;
-            font-size: 1.4rem;
-            color: var(--dark);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .section-title {
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      color: var(--dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
+    .table-container {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
 
-        th, td {
-            padding: 1rem 1.5rem;
-        }
+    th, td {
+      padding: 1rem 1.5rem;
+    }
 
-        th {
-            background-color: #e2e8f0;
-            color: var(--dark);
-            font-weight: 600;
-        }
+    th {
+      background-color: #e2e8f0;
+      color: var(--dark);
+      font-weight: 600;
+    }
 
-        tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
 
-        tr:hover {
-            background-color: #f1f5f9;
-        }
+    tr:hover {
+      background-color: #f1f5f9;
+    }
 
-        .rank-badge {
-            display: inline-block;
-            width: 28px;
-            height: 28px;
-            text-align: center;
-            line-height: 28px;
-            border-radius: 50%;
-            font-weight: bold;
-            color: white;
-        }
+    .rank-badge {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      text-align: center;
+      line-height: 28px;
+      border-radius: 50%;
+      font-weight: bold;
+      color: white;
+    }
 
-        tr:nth-child(1) .rank-badge { background-color: #fbbf24; }
-        tr:nth-child(2) .rank-badge { background-color: #94a3b8; }
-        tr:nth-child(3) .rank-badge { background-color: #b45309; }
-        tr:nth-child(n+4) .rank-badge { background-color: var(--gray); }
+    tr:nth-child(1) .rank-badge { background-color: #fbbf24; }
+    tr:nth-child(2) .rank-badge { background-color: #94a3b8; }
+    tr:nth-child(3) .rank-badge { background-color: #b45309; }
+    tr:nth-child(n+4) .rank-badge { background-color: var(--gray); }
 
-        /* Terrenos */
-        .olx-box { background: white; padding: 2rem; border-radius: 10px; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .btn-sub { padding: 0.75rem 1.5rem; font-weight: bold; border: 2px solid #10b981; border-radius: 5px; cursor: pointer; margin-right: 10px; transition: 0.2s; background: white; color: #10b981; }
-        .btn-sub.active, .btn-sub:hover { background: #10b981; color: white; }
-        
-        .sub-page { display: none; }
-        .sub-page.active { display: block; }
+    .olx-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
 
-        .grid-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
-        .card-anuncio { background: white; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
-        .img-container { width: 100%; height: 180px; background-color: #cbd5e1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .sem-foto { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; font-size: 0.9rem; font-weight: 500; text-align: center; padding: 1rem; }
-        
-        .card-conteudo { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .card-anuncio h4 { font-size: 1.2rem; color: #0f172a; margin-bottom: 0.5rem; }
-        .card-anuncio .preco { font-size: 1.4rem; font-weight: bold; color: #047857; margin-bottom: 0.5rem; }
+    .btn-sub {
+      padding: 0.75rem 1.5rem;
+      font-weight: bold;
+      border: 2px solid #10b981;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+      transition: 0.2s;
+      background: white;
+      color: #10b981;
+    }
 
-        .acoes-anuncio {
-            display: flex;
-            gap: 10px;
-            margin-top: 1rem;
-        }
-        .btn-editar {
-            flex: 1;
-            background: #f59e0b;
-            color: white;
-            border: none;
-            padding: 0.5rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-excluir {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+    .btn-sub.active, .btn-sub:hover {
+      background: #10b981;
+      color: white;
+    }
 
-        /* Reclame Verde */
-        .ra-header {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
+    .sub-page {
+      display: none;
+    }
 
-        .ra-tabs {
-            display: flex;
-            gap: 10px;
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 1.5rem;
-        }
+    .sub-page.active {
+      display: block;
+    }
 
-        .ra-tab {
-            padding: 0.75rem 1.5rem;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-weight: 600;
-            color: var(--gray);
-            border-bottom: 3px solid transparent;
-        }
+    .grid-produtos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
 
-        .ra-tab.active {
-            color: var(--warning);
-            border-bottom-color: var(--warning);
-        }
+    .card-anuncio {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+    }
 
-        .btn-reclamar {
-            background-color: var(--warning);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+    .img-container {
+      width: 100%;
+      height: 180px;
+      background-color: #cbd5e1;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .btn-reclamar:hover {
-            background-color: #d97706;
-        }
+    .img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-        .complaint-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border-left: 6px solid var(--gray);
-        }
+    .sem-foto {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-align: center;
+      padding: 1rem;
+    }
 
-        .complaint-card.status-resolvido { border-left-color: var(--success); }
-        .complaint-card.status-pendente { border-left-color: var(--warning); }
-        .complaint-card.status-nao-respondido { border-left-color: var(--danger); }
+    .card-conteudo {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-        .complaint-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
+    .card-anuncio h4 {
+      font-size: 1.2rem;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
 
-        .complaint-title {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
+    .card-anuncio .preco {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #047857;
+      margin-bottom: 0.5rem;
+    }
 
-        .badge-status {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: white;
-        }
+    .acoes-anuncio {
+      display: flex;
+      gap: 10px;
+      margin-top: 1rem;
+    }
 
-        .badge-status.resolvido { background-color: var(--success); }
-        .badge-status.pendente { background-color: var(--warning); }
-        .badge-status.nao-respondido { background-color: var(--danger); }
+    .btn-editar {
+      flex: 1;
+      background: #f59e0b;
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-        .complaint-meta {
-            font-size: 0.85rem;
-            color: var(--gray);
-            margin-bottom: 0.5rem;
-        }
+    .btn-excluir {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-        /* Modais */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+    .ra-header {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
 
-        .modal.active { display: flex; }
+    .ra-tabs {
+      display: flex;
+      gap: 10px;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 1.5rem;
+    }
 
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 500px;
-        }
+    .ra-tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-weight: 600;
+      color: var(--gray);
+      border-bottom: 3px solid transparent;
+    }
 
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
+    .ra-tab.active {
+      color: var(--warning);
+      border-bottom-color: var(--warning);
+    }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.4rem;
-            font-weight: 600;
-        }
+    .btn-reclamar {
+      background-color: var(--warning);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
 
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 5px;
-        }
+    .btn-reclamar:hover {
+      background-color: #d97706;
+    }
 
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
+    .complaint-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-left: 6px solid var(--gray);
+    }
 
-        .btn-cancel {
-            background: #e2e8f0;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
+    .complaint-card.status-resolvido { border-left-color: var(--success); }
+    .complaint-card.status-pendente { border-left-color: var(--warning); }
+    .complaint-card.status-nao-respondido { border-left-color: var(--danger); }
+
+    .complaint-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .complaint-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .badge-status {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: white;
+    }
+
+    .badge-status.resolvido { background-color: var(--success); }
+    .badge-status.pendente { background-color: var(--warning); }
+    .badge-status.nao-respondido { background-color: var(--danger); }
+
+    .complaint-meta {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-bottom: 0.5rem;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-cancel {
+      background: #e2e8f0;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: #0f172a;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      display: none;
+      z-index: 2000;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .toast.show {
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <h1>🌱 Eco<span>Carbon</span></h1>
-        <nav>
-            <button onclick="switchPage('dashboard')" id="nav-dashboard" class="active">Mercado Global</button>
-            <button onclick="switchPage('terrenos')" id="nav-terrenos">Terrenos</button>
-            <button onclick="switchPage('reclame')" id="nav-reclame">Reclame Verde</button>
-        </nav>
-    </header>
+<header>
+  <h1>🌱 Eco<span>Carbon</span></h1>
+  <nav>
+    <button onclick="switchPage('dashboard')" id="nav-dashboard" class="active">Mercado Global</button>
+    <button onclick="switchPage('terrenos')" id="nav-terrenos">Terrenos</button>
+    <button onclick="switchPage('reclame')" id="nav-reclame">Reclame Verde</button>
+  </nav>
+</header>
 
-    <div class="container">
-        
-        <main id="page-dashboard" class="page active">
-            <div class="section-title">
-                <h2>Preços Atuais do Carbono (tCO₂e)</h2>
-            </div>
-            
-            <div class="grid-prices" id="prices-grid">
-                <div class="card-price"><h3>União Europeia (EUA)</h3><div class="price">Carregando...</div></div>
-                <div class="card-price"><h3>Reino Unido (UK)</h3><div class="price">Carregando...</div></div>
-                <div class="card-price"><h3>Califórnia (CCA)</h3><div class="price">Carregando...</div></div>
-                <div class="card-price"><h3>Mercado Voluntário</h3><div class="price">Carregando...</div></div>
-            </div>
-
-            <div class="section-title">
-                <h2>Ranking dos Maiores Compradores Recentes</h2>
-                <small style="color: var(--gray)">Atualizado dinamicamente</small>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Posição</th>
-                            <th>Empresa / Corporação</th>
-                            <th>Setor Industrial</th>
-                            <th>Volume Comprado (Créditos / tCO₂e)</th>
-                            <th>Investimento Estimado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ranking-table">
-                    </tbody>
-                </table>
-            </div>
-        </main>
-
-        <section id="page-terrenos" class="page">
-            <div class="olx-box">
-                <h2>Balcão de Negócios de Áreas</h2>
-                <p style="color: var(--gray); margin-bottom: 1rem;">Negocie terrenos focados em preservação ambiental e créditos de carbono.</p>
-                <div>
-                    <button id="btn-sub-compre" class="btn-sub active" onclick="switchSub('compre')">🔍 Compre Aqui</button>
-                    <button id="btn-sub-anuncie" class="btn-sub" onclick="switchSub('anuncie')">📢 Anuncie Aqui</button>
-                </div>
-            </div>
-
-            <div id="sub-compre" class="sub-page active">
-                <div class="grid-produtos" id="lista-anuncios">
-                </div>
-            </div>
-
-            <div id="sub-anuncie" class="sub-page">
-                <div style="background: white; padding: 2rem; border-radius: 10px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    <h3 id="form-terreno-titulo">Anunciar Novo Terreno</h3>
-                    <form id="form-anuncio-id" onsubmit="salvarAnuncio(event)">
-                        <input type="hidden" id="id-anuncio">
-                        <div class="form-group"><label>Título do Anúncio</label><input type="text" id="tit-anuncio" placeholder="Ex: Fazenda com Mata Nativa Reservada" required></div>
-                        <div class="form-group"><label>Preço (R$)</label><input type="text" id="prec-anuncio" placeholder="Ex: R$ 2.500.000" required></div>
-                        <div class="form-group"><label>Localização</label><input type="text" id="loc-anuncio" placeholder="Ex: Sorocaba - SP" required></div>
-                        <div class="form-group"><label>Tamanho (Hectares)</label><input type="text" id="tam-anuncio" placeholder="Ex: 500 ha" required></div>
-                        <div class="form-group"><label>Foto do Terreno</label><input type="file" id="foto-anuncio" accept="image/*" onchange="carregarImagem(event)"></div>
-                        <div class="form-group"><label>Descrição</label><textarea id="desc-anuncio" rows="3" placeholder="Detalhes sobre bioma, documentação..." required></textarea></div>
-                        <button type="submit" id="btn-salvar-texto" style="background: var(--primary); color: white; border: none; padding: 0.75rem; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer;">Publicar Anúncio</button>
-                        <button type="button" id="btn-cancelar-edicao" style="display:none; background: #e2e8f0; color: black; border: none; padding: 0.75rem; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px;" onclick="cancelarEdicao()">Cancelar Edição</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <section id="page-reclame" class="page">
-            <div class="ra-header">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <div>
-                        <h2>Reclame Verde</h2>
-                        <p style="color: var(--gray)">Plataforma de denúncias contra Greenwashing e irregularidades de créditos de carbono.</p>
-                    </div>
-                    <button class="btn-reclamar" onclick="toggleModal(true)">Fazer Reclamação</button>
-                </div>
-
-                <div class="ra-tabs">
-                    <button class="ra-tab active" onclick="filterComplaints('todas', this)">Todas</button>
-                    <button class="ra-tab" onclick="filterComplaints('resolvido', this)">Resolvidas</button>
-                    <button class="ra-tab" onclick="filterComplaints('pendente', this)">Em Réplica</button>
-                    <button class="ra-tab" onclick="filterComplaints('nao-respondido', this)">Não Respondidas</button>
-                </div>
-            </div>
-
-            <div id="complaints-list">
-            </div>
-        </section>
+<div class="container">
+  <main id="page-dashboard" class="page active">
+    <div class="section-title">
+      <h2>Preços Atuais do Carbono (tCO₂e)</h2>
     </div>
 
-    <div class="modal" id="complaint-modal">
-        <div class="modal-content">
-            <h3>Registrar Nova Reclamação</h3>
-            <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 1.5rem;">Sua denúncia ajuda a manter o mercado de carbono transparente.</p>
-            <form id="complaint-form" onsubmit="submitComplaint(event)">
-                <div class="form-group">
-                    <label>Título da Reclamação</label>
-                    <input type="text" id="form-title" required placeholder="Ex: Crédito fantasma detectado">
-                </div>
-                <div class="form-group">
-                    <label>Empresa Acusada</label>
-                    <input type="text" id="form-company" required placeholder="Ex: Multinacional de Petróleo X">
-                </div>
-                <div class="form-group">
-                    <label>Tipo de Irregularidade</label>
-                    <select id="form-category">
-                        <option value="Greenwashing">Greenwashing / Propaganda Enganosa</option>
-                        <option value="Dupla Contagem">Dupla Contagem de Créditos</option>
-                        <option value="Ameaça à comunidade">Projetos em Terras Indígenas sem consentimento</option>
-                        <option value="Outros">Outros</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Relato Completo</label>
-                    <textarea id="form-text" rows="4" required placeholder="Explique os detalhes da sua denúncia..."></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="toggleModal(false)">Cancelar</button>
-                    <button type="submit" class="btn-reclamar">Publicar Reclamação</button>
-                </div>
-            </form>
+    <div class="grid-prices" id="prices-grid">
+      <div class="card-price"><h3>União Europeia (EUA)</h3><div class="price">Carregando...</div></div>
+      <div class="card-price"><h3>Reino Unido (UK)</h3><div class="price">Carregando...</div></div>
+      <div class="card-price"><h3>Califórnia (CCA)</h3><div class="price">Carregando...</div></div>
+      <div class="card-price"><h3>Mercado Voluntário</h3><div class="price">Carregando...</div></div>
+    </div>
+
+    <div class="section-title">
+      <h2>Ranking dos Maiores Compradores Recentes</h2>
+      <small style="color: var(--gray)">Atualizado dinamicamente</small>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Posição</th>
+            <th>Empresa / Corporação</th>
+            <th>Setor Industrial</th>
+            <th>Volume Comprado (Créditos / tCO₂e)</th>
+            <th>Investimento Estimado</th>
+          </tr>
+        </thead>
+        <tbody id="ranking-table"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <section id="page-terrenos" class="page">
+    <div class="olx-box">
+      <h2>Balcão de Negócios de Áreas</h2>
+      <p style="color: var(--gray); margin-bottom: 1rem;">Negocie terrenos focados em preservação ambiental e créditos de carbono.</p>
+      <div>
+        <button id="btn-sub-compre" class="btn-sub active" onclick="switchSub('compre')">🔍 Compre Aqui</button>
+        <button id="btn-sub-anuncie" class="btn-sub" onclick="switchSub('anuncie')">📢 Anuncie Aqui</button>
+      </div>
+    </div>
+
+    <div id="sub-compre" class="sub-page active">
+      <div class="grid-produtos" id="lista-anuncios"></div>
+    </div>
+
+    <div id="sub-anuncie" class="sub-page">
+      <div style="background: white; padding: 2rem; border-radius: 10px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h3 id="form-terreno-titulo">Anunciar Novo Terreno</h3>
+        <form id="form-anuncio-id" onsubmit="salvarAnuncio(event)">
+          <input type="hidden" id="id-anuncio">
+          <div class="form-group"><label>Título do Anúncio</label><input type="text" id="tit-anuncio" required></div>
+          <div class="form-group"><label>Preço (R$)</label><input type="text" id="prec-anuncio" required></div>
+          <div class="form-group"><label>Localização</label><input type="text" id="loc-anuncio" required></div>
+          <div class="form-group"><label>Tamanho (Hectares)</label><input type="text" id="tam-anuncio" required></div>
+          <div class="form-group"><label>Foto do Terreno</label><input type="file" id="foto-anuncio" accept="image/*" onchange="carregarImagem(event)"></div>
+          <div class="form-group"><label>Descrição</label><textarea id="desc-anuncio" rows="3" required></textarea></div>
+          <button type="submit" id="btn-salvar-texto" style="background: var(--primary); color: white; border: none; padding: 0.75rem; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer;">Publicar Anúncio</button>
+          <button type="button" id="btn-cancelar-edicao" style="display:none; background: #e2e8f0; color: black; border: none; padding: 0.75rem; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px;" onclick="cancelarEdicao()">Cancelar Edição</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="page-reclame" class="page">
+    <div class="ra-header">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+          <h2>Reclame Verde</h2>
+          <p style="color: var(--gray)">Plataforma de denúncias contra Greenwashing e irregularidades de créditos de carbono.</p>
         </div>
+        <button class="btn-reclamar" onclick="toggleModal(true)">Fazer Reclamação</button>
+      </div>
+
+      <div class="ra-tabs">
+        <button class="ra-tab active" onclick="filterComplaints('todas', this)">Todas</button>
+        <button class="ra-tab" onclick="filterComplaints('resolvido', this)">Resolvidas</button>
+        <button class="ra-tab" onclick="filterComplaints('pendente', this)">Em Réplica</button>
+        <button class="ra-tab" onclick="filterComplaints('nao-respondido', this)">Não Respondidas</button>
+      </div>
     </div>
 
-    <script>
-        // CONFIGURAÇÃO DO SUPABASE
-        const SUPABASE_URL = "https://krccolhleyjmqnoddack.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_krfMJPMsWsqhtB-Y4JhNUg_CEBYclAD";
+    <div id="complaints-list"></div>
+  </section>
+</div>
 
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<div class="modal" id="complaint-modal">
+  <div class="modal-content">
+    <h3>Registrar Nova Reclamação</h3>
+    <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 1.5rem;">Sua denúncia ajuda a manter o mercado de carbono transparente.</p>
+    <form id="complaint-form" onsubmit="submitComplaint(event)">
+      <div class="form-group">
+        <label>Título da Reclamação</label>
+        <input type="text" id="form-title" required>
+      </div>
+      <div class="form-group">
+        <label>Empresa Acusada</label>
+        <input type="text" id="form-company" required>
+      </div>
+      <div class="form-group">
+        <label>Tipo de Irregularidade</label>
+        <select id="form-category">
+          <option value="Greenwashing">Greenwashing / Propaganda Enganosa</option>
+          <option value="Dupla Contagem">Dupla Contagem de Créditos</option>
+          <option value="Ameaça à comunidade">Projetos em Terras Indígenas sem consentimento</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Relato Completo</label>
+        <textarea id="form-text" rows="4" required></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="toggleModal(false)">Cancelar</button>
+        <button type="submit" class="btn-reclamar">Publicar Reclamação</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-        let listaAnunciosLocal = [];
+<div id="toast" class="toast"></div>
 
-        // --- GERENCIADOR DE PÁGINAS ---
-        function switchPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`page-${pageId}`).classList.add('active');
-            document.getElementById(`nav-${pageId}`).classList.add('active');
-        }
+<script>
+  const SUPABASE_URL = "https://krccolhleyjmqnoddack.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_krfMJPMsWsqhtB-Y4JhNUg_CEBYclAD";
+  const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        function switchSub(subId) {
-            document.querySelectorAll('.sub-page').forEach(sp => sp.classList.remove('active'));
-            document.querySelectorAll('.btn-sub').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`sub-${subId}`).classList.add('active');
-            document.getElementById(`btn-sub-${subId}`).classList.add('active');
-        }
+  let listaAnunciosLocal = [];
+  let imagemCarregadaBase64 = "";
 
-        // --- MERCADO GLOBAL ---
-        function updateLiveMarketData() {
-            const prices = {
-                eu: (70 + Math.random() * 5).toFixed(2),
-                uk: (62 + Math.random() * 4).toFixed(2),
-                california: (38 + Math.random() * 2).toFixed(2),
-                voluntary: (8 + Math.random() * 3).toFixed(2)
-            };
-            const now = new Date().toLocaleTimeString();
-            const pricesGrid = document.getElementById('prices-grid');
-            if (pricesGrid) {
-                pricesGrid.innerHTML = `
-                    <div class="card-price"><h3>União Europeia (EUA)</h3><div class="price">€ ${prices.eu}</div><div class="update-time">Atualizado às ${now}</div></div>
-                    <div class="card-price"><h3>Reino Unido (UK)</h3><div class="price">£ ${prices.uk}</div><div class="update-time">Atualizado às ${now}</div></div>
-                    <div class="card-price"><h3>Califórnia (CCA)</h3><div class="price">US$ ${prices.california}</div><div class="update-time">Atualizado às ${now}</div></div>
-                    <div class="card-price"><h3>Mercado Voluntário</h3><div class="price">US$ ${prices.voluntary}</div><div class="update-time">Atualizado às ${now}</div></div>
-                `;
-            }
-        }
+  function toast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => t.classList.remove("show"), 2500);
+  }
 
-        const companiesData = [
-            { name: "Global Tech Inc.", sector: "Tecnologia / Data Centers", baseVol: 4500000, investment: "US$ 67.5M" },
-            { name: "Euro Airways", sector: "Aviação Comercial", baseVol: 3800000, investment: "US$ 57.0M" },
-            { name: "Trans-Pacific Logistics", sector: "Marítimo / Transportes", baseVol: 2900000, investment: "US$ 43.5M" },
-            { name: "MegaSteel Group", sector: "Siderurgia", baseVol: 2100000, investment: "US$ 31.5M" },
-            { name: "Heavens Automotive", sector: "Automotivo (Combustão)", baseVol: 1750000, investment: "US$ 26.2M" }
-        ];
+  function switchPage(pageId) {
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`page-${pageId}`).classList.add('active');
+    document.getElementById(`nav-${pageId}`).classList.add('active');
+  }
 
-        function renderRanking() {
-            const tbody = document.getElementById('ranking-table');
-            if(!tbody) return;
-            tbody.innerHTML = "";
-            
-            companiesData.forEach((comp, index) => {
-                const dynamicVolume = comp.baseVol + Math.floor(Math.random() * 1200);
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><span class="rank-badge">${index + 1}</span></td>
-                    <td><strong>${comp.name}</strong></td>
-                    <td>${comp.sector}</td>
-                    <td>${dynamicVolume.toLocaleString('pt-BR')} tCO₂e</td>
-                    <td>${comp.investment}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+  function switchSub(subId) {
+    document.querySelectorAll('.sub-page').forEach(sp => sp.classList.remove('active'));
+    document.querySelectorAll('.btn-sub').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`sub-${subId}`).classList.add('active');
+    document.getElementById(`btn-sub-${subId}`).classList.add('active');
+  }
 
-        setInterval(updateLiveMarketData, 4000);
-        setInterval(renderRanking, 6000);
+  function updateLiveMarketData() {
+    const prices = {
+      eu: (70 + Math.random() * 5).toFixed(2),
+      uk: (62 + Math.random() * 4).toFixed(2),
+      california: (38 + Math.random() * 2).toFixed(2),
+      voluntary: (8 + Math.random() * 3).toFixed(2)
+    };
+    const now = new Date().toLocaleTimeString();
+    const pricesGrid = document.getElementById('prices-grid');
+    if (pricesGrid) {
+      pricesGrid.innerHTML = `
+        <div class="card-price"><h3>União Europeia (EUA)</h3><div class="price">€ ${prices.eu}</div><div class="update-time">Atualizado às ${now}</div></div>
+        <div class="card-price"><h3>Reino Unido (UK)</h3><div class="price">£ ${prices.uk}</div><div class="update-time">Atualizado às ${now}</div></div>
+        <div class="card-price"><h3>Califórnia (CCA)</h3><div class="price">US$ ${prices.california}</div><div class="update-time">Atualizado às ${now}</div></div>
+        <div class="card-price"><h3>Mercado Voluntário</h3><div class="price">US$ ${prices.voluntary}</div><div class="update-time">Atualizado às ${now}</div></div>
+      `;
+    }
+  }
 
-        // --- ANÚNCIOS PADRÃO COM FOTO DE BACKUP ---
-        const anunciosPadrao = [
-            { id: "p1", titulo: "Área de Preservação Amazônica", preco: "R$ 5.200.000", loc: "Sinop - MT", tam: "1.100 ha", desc_texto: "Mata nativa intacta com documentação 100% regularizada no CAR e GEO. Pronta para auditoria ambiental.", foto: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=600&q=80" },
-            { id: "p2", titulo: "Gleba para Crédito de Carbono", preco: "R$ 1.980.000", loc: "Formosa - GO", tam: "420 ha", desc_texto: "Bioma Cerrado com alto potencial de retenção de biomassa. Ideal para compensação florestal.", foto: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80" }
-        ];
+  const companiesData = [
+    { name: "Global Tech Inc.", sector: "Tecnologia / Data Centers", baseVol: 4500000, investment: "US$ 67.5M" },
+    { name: "Euro Airways", sector: "Aviação Comercial", baseVol: 3800000, investment: "US$ 57.0M" },
+    { name: "Trans-Pacific Logistics", sector: "Marítimo / Transportes", baseVol: 2900000, investment: "US$ 43.5M" },
+    { name: "MegaSteel Group", sector: "Siderurgia", baseVol: 2100000, investment: "US$ 31.5M" },
+    { name: "Heavens Automotive", sector: "Automotivo (Combustão)", baseVol: 1750000, investment: "US$ 26.2M" }
+  ];
 
-        // --- RECLAMAÇÕES PADRÃO DE BACKUP ---
-        const reclamacoesPadrao = [
-            { title: "Créditos falsos comprados em área de desmatamento ativo", company: "MegaSteel Group", category: "Greenwashing", text_content: "Verificamos através de dados de satélite que a floresta de onde derivam os créditos comprados pela empresa foi queimada no mês passado.", status: "nao-respondido", status_text: "Não Respondida" },
-            { title: "Propaganda de neutralidade de carbono irreal", company: "Euro Airways", category: "Greenwashing", text_content: "A empresa alega voos 100% ecológicos, mas usa compensações baratas de projetos de energia renovável antigos, violando a nova diretiva global.", status: "pendente", status_text: "Em Réplica" },
-            { title: "Dupla contagem resolvida com auditoria", company: "Global Tech Inc.", category: "Dupla Contagem", text_content: "Haviam emitido o mesmo lote de créditos para o servidor americano e europeu. Após notificação, a empresa cancelou as redundâncias.", status: "resolvido", status_text: "Resolvido" }
-        ];
+  function renderRanking() {
+    const tbody = document.getElementById('ranking-table');
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    companiesData.forEach((comp, index) => {
+      const dynamicVolume = comp.baseVol + Math.floor(Math.random() * 1200);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="rank-badge">${index + 1}</span></td>
+        <td><strong>${comp.name}</strong></td>
+        <td>${comp.sector}</td>
+        <td>${dynamicVolume.toLocaleString('pt-BR')} tCO₂e</td>
+        <td>${comp.investment}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
-        // --- SISTEMA DE TERRENOS COM SUPABASE ---
-        let imagemCarregadaBase64 = "";
+  const anunciosPadrao = [
+    { id: "p1", titulo: "Área de Preservação Amazônica", preco: "R$ 5.200.000", loc: "Sinop - MT", tam: "1.100 ha", desc_texto: "Mata nativa intacta com documentação 100% regularizada no CAR e GEO.", foto: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=600&q=80" },
+    { id: "p2", titulo: "Gleba para Crédito de Carbono", preco: "R$ 1.980.000", loc: "Formosa - GO", tam: "420 ha", desc_texto: "Bioma Cerrado com alto potencial de retenção de biomassa.", foto: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80" }
+  ];
 
-        function carregarImagem(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onloadend = function() { imagemCarregadaBase64 = reader.result; }
-            if (file) reader.readAsDataURL(file);
-        }
+  const reclamacoesPadrao = [
+    { title: "Créditos falsos comprados em área de desmatamento ativo", company: "MegaSteel Group", category: "Greenwashing", text_content: "Verificamos através de dados de satélite que a floresta de onde derivam os créditos foi queimada no mês passado.", status: "nao-respondido", status_text: "Não Respondida" },
+    { title: "Propaganda de neutralidade de carbono irreal", company: "Euro Airways", category: "Greenwashing", text_content: "A empresa alega voos 100% ecológicos, mas usa compensações baratas de projetos antigos.", status: "pendente", status_text: "Em Réplica" },
+    { title: "Dupla contagem resolvida com auditoria", company: "Global Tech Inc.", category: "Dupla Contagem", text_content: "Haviam emitido o mesmo lote de créditos para servidor americano e europeu.", status: "resolvido", status_text: "Resolvido" }
+  ];
 
-        async function carregarAnunciosDoBanco() {
-            const container = document.getElementById('lista-anuncios');
-            if (!container) return;
-            container.innerHTML = "<p style='padding:1rem; color:var(--gray);'>Carregando terrenos...</p>";
-            
-            let terrenos = [];
-            try {
-                const { data, error } = await _supabase.from('terrenos').select('*').order('id', { ascending: false });
-                if (!error && data) terrenos = data;
-            } catch (e) { console.log(e); }
+  function carregarImagem(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = function() { imagemCarregadaBase64 = reader.result; };
+    if (file) reader.readAsDataURL(file);
+  }
 
-            listaAnunciosLocal = [...terrenos, ...anunciosPadrao];
+  async function carregarAnunciosDoBanco() {
+    const container = document.getElementById('lista-anuncios');
+    if (!container) return;
+    container.innerHTML = "<p style='padding:1rem; color:var(--gray);'>Carregando terrenos...</p>";
 
-            container.innerHTML = "";
-            listaAnunciosLocal.forEach(ad => {
-                let blocoImagem = ad.foto ? `<img src="${ad.foto}" alt="Foto">` : `<div class="sem-foto">🌳<br>Foto não enviada</div>`;
-                container.innerHTML += `
-                    <div class="card-anuncio" id="anuncio-card-${ad.id}">
-                        <div class="img-container">${blocoImagem}</div>
-                        <div class="card-conteudo">
-                            <div>
-                                <div class="preco">${ad.preco}</div>
-                                <h4>${ad.titulo}</h4>
-                                <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">📍 ${ad.loc} • 📏 ${ad.tam}</p>
-                                <p style="font-size: 0.9rem; color: #334155;">${ad.desc_texto}</p>
-                            </div>
-                            <div class="acoes-anuncio">
-                                <button class="btn-editar" onclick="prepararEdicao('${ad.id}')">✏️ Editar</button>
-                                <button class="btn-excluir" onclick="excluirAnuncio('${ad.id}')">🗑️ Excluir</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
+    let terrenos = [];
+    try {
+      const { data, error } = await _supabase.from('terrenos').select('*').order('id', { ascending: false });
+      if (!error && data) terrenos = data;
+    } catch (e) {}
 
-        async function salvarAnuncio(event) {
-            event.preventDefault();
-            const idEdicao = document.getElementById('id-anuncio').value;
-            
-            const novoAnuncio = {
-                titulo: document.getElementById('tit-anuncio').value,
-                preco: document.getElementById('prec-anuncio').value,
-                loc: document.getElementById('loc-anuncio').value,
-                tam: document.getElementById('tam-anuncio').value,
-                desc_texto: document.getElementById('desc-anuncio').value
-            };
+    listaAnunciosLocal = [...terrenos, ...anunciosPadrao];
+    container.innerHTML = "";
 
-            if (imagemCarregadaBase64) {
-                novoAnuncio.foto = imagemCarregadaBase64;
-            }
+    listaAnunciosLocal.forEach(ad => {
+      const blocoImagem = ad.foto
+        ? `<img src="${ad.foto}" alt="Foto">`
+        : `<div class="sem-foto">🌳<br>Foto não enviada</div>`;
 
-            if (idEdicao && !idEdicao.startsWith('p')) {
-                // Atualização no Supabase
-                try {
-                    await _supabase.from('terrenos').update(novoAnuncio).eq('id', idEdicao);
-                } catch(e){}
-            } else {
-                // Inserção nova no Supabase
-                try {
-                    if (idEdicao.startsWith('p')) {
-                        novoAnuncio.foto = novoAnuncio.foto || "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=600&q=80";
-                    }
-                    await _supabase.from('terrenos').insert([novoAnuncio]);
-                } catch(e) {}
-            }
-            
-            cancelarEdicao();
-            switchSub('compre');
-            carregarAnunciosDoBanco();
-        }
+      container.innerHTML += `
+        <div class="card-anuncio" id="anuncio-card-${ad.id}">
+          <div class="img-container">${blocoImagem}</div>
+          <div class="card-conteudo">
+            <div>
+              <div class="preco">${ad.preco}</div>
+              <h4>${ad.titulo}</h4>
+              <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">📍 ${ad.loc} • 📏 ${ad.tam}</p>
+              <p style="font-size: 0.9rem; color: #334155;">${ad.desc_texto}</p>
+            </div>
+            <div class="acoes-anuncio">
+              <button class="btn-editar" onclick="prepararEdicao('${ad.id}')">✏️ Editar</button>
+              <button class="btn-excluir" onclick="excluirAnuncio('${ad.id}')">🗑️ Excluir</button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
 
-        function prepararEdicao(id) {
-            const ad = listaAnunciosLocal.find(item => item.id == id);
-            if (!ad) return;
+  async function salvarAnuncio(event) {
+    event.preventDefault();
+    const idEdicao = document.getElementById('id-anuncio').value;
 
-            document.getElementById('id-anuncio').value = ad.id;
-            document.getElementById('tit-anuncio').value = ad.titulo;
-            document.getElementById('prec-anuncio').value = ad.preco;
-            document.getElementById('loc-anuncio').value = ad.loc;
-            document.getElementById('tam-anuncio').value = ad.tam;
-            document.getElementById('desc-anuncio').value = ad.desc_texto;
+    const novoAnuncio = {
+      titulo: document.getElementById('tit-anuncio').value,
+      preco: document.getElementById('prec-anuncio').value,
+      loc: document.getElementById('loc-anuncio').value,
+      tam: document.getElementById('tam-anuncio').value,
+      desc_texto: document.getElementById('desc-anuncio').value
+    };
 
-            document.getElementById('form-terreno-titulo').innerText = "✏️ Editando Terreno";
-            document.getElementById('btn-salvar-texto').innerText = "Salvar Alterações";
-            document.getElementById('btn-cancelar-edicao').style.display = "block";
+    if (imagemCarregadaBase64) novoAnuncio.foto = imagemCarregadaBase64;
 
-            switchSub('anuncie');
-        }
+    try {
+      if (idEdicao) {
+        const { error } = await _supabase.from('terrenos').update(novoAnuncio).eq('id', idEdicao);
+        if (error) throw error;
+        toast("Anúncio atualizado com sucesso.");
+      } else {
+        const { error } = await _supabase.from('terrenos').insert([novoAnuncio]);
+        if (error) throw error;
+        toast("Anúncio publicado com sucesso.");
+      }
 
-        function cancelarEdicao() {
-            document.getElementById('form-anuncio-id').reset();
-            document.getElementById('id-anuncio').value = "";
-            imagemCarregadaBase64 = "";
-            document.getElementById('form-terreno-titulo').innerText = "Anunciar Novo Terreno";
-            document.getElementById('btn-salvar-texto').innerText = "Publicar Anúncio";
-            document.getElementById('btn-cancelar-edicao').style.display = "none";
-        }
+      cancelarEdicao();
+      switchSub('compre');
+      await carregarAnunciosDoBanco();
+    } catch (error) {
+      console.error(error);
+      toast("Erro ao salvar anúncio.");
+    }
+  }
 
-        async function excluirAnuncio(id) {
-            if (confirm("Tem certeza que deseja remover este anúncio de terreno?")) {
-                if (id && !id.toString().startsWith('p')) {
-                    try {
-                        await _supabase.from('terrenos').delete().eq('id', id);
-                    } catch(e){}
-                }
-                // Remove visualmente da tela imediatamente
-                const elemento = document.getElementById(`anuncio-card-${id}`);
-                if (elemento) elemento.remove();
-            }
-        }
+  function prepararEdicao(id) {
+    const ad = listaAnunciosLocal.find(item => String(item.id) === String(id));
+    if (!ad) return;
 
-        // --- RECLAME VERDE ---
-        async function carregarReclamacoesDoBanco() {
-            const listContainer = document.getElementById('complaints-list');
-            if (!listContainer) return;
-            listContainer.innerHTML = "<p style='padding:1rem; text-align:center; color:var(--gray);'>Carregando denúncias...</p>";
+    document.getElementById('id-anuncio').value = ad.id;
+    document.getElementById('tit-anuncio').value = ad.titulo || '';
+    document.getElementById('prec-anuncio').value = ad.preco || '';
+    document.getElementById('loc-anuncio').value = ad.loc || '';
+    document.getElementById('tam-anuncio').value = ad.tam || '';
+    document.getElementById('desc-anuncio').value = ad.desc_texto || '';
 
-            let reclamacoes = [];
-            try {
-                const { data, error } = await _supabase.from('reclamacoes').select('*').order('id', { ascending: false });
-                if (!error && data) reclamacoes = data;
-            } catch(e) { console.log(e); }
+    document.getElementById('form-terreno-titulo').innerText = "✏️ Editando Terreno";
+    document.getElementById('btn-salvar-texto').innerText = "Salvar Alterações";
+    document.getElementById('btn-cancelar-edicao').style.display = "block";
+    switchSub('anuncie');
+  }
 
-            const listaExibicao = [...reclamacoes, ...reclamacoesPadrao];
-            window.todasReclamacoes = listaExibicao; 
-            renderizarListaFiltrada(listaExibicao);
-        }
+  function cancelarEdicao() {
+    document.getElementById('form-anuncio-id').reset();
+    document.getElementById('id-anuncio').value = "";
+    imagemCarregadaBase64 = "";
+    document.getElementById('form-terreno-titulo').innerText = "Anunciar Novo Terreno";
+    document.getElementById('btn-salvar-texto').innerText = "Publicar Anúncio";
+    document.getElementById('btn-cancelar-edicao').style.display = "none";
+  }
 
-        function renderizarListaFiltrada(lista) {
-            const listContainer = document.getElementById('complaints-list');
-            if (!listContainer) return;
-            listContainer.innerHTML = "";
+  async function excluirAnuncio(id) {
+    if (!confirm("Tem certeza que deseja remover este anúncio de terreno?")) return;
 
-            if (!lista || lista.length === 0) {
-                listContainer.innerHTML = `<p style="text-align:center; padding: 2rem; color: var(--gray);">Nenhuma denúncia encontrada.</p>`;
-                return;
-            }
+    try {
+      if (id && !String(id).startsWith('p')) {
+        const { error } = await _supabase.from('terrenos').delete().eq('id', id);
+        if (error) throw error;
+      }
 
-            lista.forEach(c => {
-                const div = document.createElement('div');
-                div.className = `complaint-card status-${c.status}`;
-                div.innerHTML = `
-                    <div class="complaint-header">
-                        <span class="complaint-title">${c.title}</span>
-                        <span class="badge-status ${c.status}">${c.status_text}</span>
-                    </div>
-                    <div class="complaint-meta">Reclamação contra <strong>${c.company}</strong> | Tipo: ${c.category}</div>
-                    <p style="font-size: 0.95rem; color: #334155;">${c.text_content}</p>
-                `;
-                listContainer.appendChild(div);
-            });
-        }
+      const elemento = document.getElementById(`anuncio-card-${id}`);
+      if (elemento) elemento.remove();
 
-        function filterComplaints(status, btnElement) {
-            document.querySelectorAll('.ra-tab').forEach(btn => btn.classList.remove('active'));
-            btnElement.classList.add('active');
-            
-            if (!window.todasReclamacoes) return;
-            const filtradas = status === 'todas' ? window.todasReclamacoes : window.todasReclamacoes.filter(c => c.status === status);
-            renderizarListaFiltrada(filtradas);
-        }
+      listaAnunciosLocal = listaAnunciosLocal.filter(item => String(item.id) !== String(id));
+      toast("Anúncio excluído com sucesso.");
+    } catch (error) {
+      console.error(error);
+      toast("Erro ao excluir anúncio.");
+    }
+  }
 
-        async function submitComplaint(event) {
-            event.preventDefault();
-            const novaReclamacao = {
-                title: document.getElementById('form-title').value,
-                company: document.getElementById('form-company').value,
-                category: document.getElementById('form-category').value,
-                text_content: document.getElementById('form-text').value,
-                status: "nao-respondido",
-                status_text: "Não Respondida"
-            };
+  async function carregarReclamacoesDoBanco() {
+    const listContainer = document.getElementById('complaints-list');
+    if (!listContainer) return;
+    listContainer.innerHTML = "<p style='padding:1rem; text-align:center; color:var(--gray);'>Carregando denúncias...</p>";
 
-            try {
-                await _supabase.from('reclamacoes').insert([novaReclamacao]);
-            } catch(e) {}
+    let reclamacoes = [];
+    try {
+      const { data, error } = await _supabase.from('reclamacoes').select('*').order('id', { ascending: false });
+      if (!error && data) reclamacoes = data;
+    } catch(e) {}
 
-            toggleModal(false);
-            document.getElementById('complaint-form').reset();
-            
-            if(!window.todasReclamacoes) window.todasReclamacoes = [];
-            window.todasReclamacoes.unshift(novaReclamacao);
-            renderizarListaFiltrada(window.todasReclamacoes);
-        }
+    window.todasReclamacoes = [...reclamacoes, ...reclamacoesPadrao];
+    renderizarListaFiltrada(window.todasReclamacoes);
+  }
 
-        function toggleModal(show) {
-            const modal = document.getElementById('complaint-modal');
-            if (show) modal.classList.add('active');
-            else modal.classList.remove('active');
-        }
+  function renderizarListaFiltrada(lista) {
+    const listContainer = document.getElementById('complaints-list');
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
 
-        // Inicialização global
-        window.onload = function() {
-            updateLiveMarketData();
-            renderRanking();
-            carregarAnunciosDoBanco();
-            carregarReclamacoesDoBanco();
-        };
-    </script>
+    if (!lista || lista.length === 0) {
+      listContainer.innerHTML = `<p style="text-align:center; padding: 2rem; color: var(--gray);">Nenhuma denúncia encontrada.</p>`;
+      return;
+    }
+
+    lista.forEach(c => {
+      const div = document.createElement('div');
+      div.className = `complaint-card status-${c.status}`;
+      div.innerHTML = `
+        <div class="complaint-header">
+          <span class="complaint-title">${c.title}</span>
+          <span class="badge-status ${c.status}">${c.status_text}</span>
+        </div>
+        <div class="complaint-meta">Reclamação contra <strong>${c.company}</strong> | Tipo: ${c.category}</div>
+        <p style="font-size: 0.95rem; color: #334155;">${c.text_content}</p>
+      `;
+      listContainer.appendChild(div);
+    });
+  }
+
+  function filterComplaints(status, btnElement) {
+    document.querySelectorAll('.ra-tab').forEach(btn => btn.classList.remove('active'));
+    btnElement.classList.add('active');
+
+    if (!window.todasReclamacoes) return;
+    const filtradas = status === 'todas' ? window.todasReclamacoes : window.todasReclamacoes.filter(c => c.status === status);
+    renderizarListaFiltrada(filtradas);
+  }
+
+  async function submitComplaint(event) {
+    event.preventDefault();
+    const novaReclamacao = {
+      title: document.getElementById('form-title').value,
+      company: document.getElementById('form-company').value,
+      category: document.getElementById('form-category').value,
+      text_content: document.getElementById('form-text').value,
+      status: "nao-respondido",
+      status_text: "Não Respondida"
+    };
+
+    try {
+      const { error } = await _supabase.from('reclamacoes').insert([novaReclamacao]);
+      if (error) throw error;
+    } catch(e) {}
+
+    toggleModal(false);
+    document.getElementById('complaint-form').reset();
+
+    if(!window.todasReclamacoes) window.todasReclamacoes = [];
+    window.todasReclamacoes.unshift(novaReclamacao);
+    renderizarListaFiltrada(window.todasReclamacoes);
+  }
+
+  function toggleModal(show) {
+    const modal = document.getElementById('complaint-modal');
+    if (show) modal.classList.add('active');
+    else modal.classList.remove('active');
+  }
+
+  window.onload = function() {
+    updateLiveMarketData();
+    renderRanking();
+    carregarAnunciosDoBanco();
+    carregarReclamacoesDoBanco();
+    setInterval(updateLiveMarketData, 4000);
+    setInterval(renderRanking, 6000);
+  };
+</script>
 </body>
 </html>
