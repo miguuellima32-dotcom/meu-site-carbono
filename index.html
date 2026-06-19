@@ -212,6 +212,31 @@
         .card-anuncio h4 { font-size: 1.2rem; color: #0f172a; margin-bottom: 0.5rem; }
         .card-anuncio .preco { font-size: 1.4rem; font-weight: bold; color: #047857; margin-bottom: 0.5rem; }
 
+        .acoes-anuncio {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        .btn-editar {
+            flex: 1;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-excluir {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
         /* Reclame Verde */
         .ra-header {
             background: white;
@@ -300,7 +325,7 @@
             margin-bottom: 0.5rem;
         }
 
-        /* Modal Form */
+        /* Modais */
         .modal {
             display: none;
             position: fixed;
@@ -417,15 +442,17 @@
 
             <div id="sub-anuncie" class="sub-page">
                 <div style="background: white; padding: 2rem; border-radius: 10px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    <h3 style="margin-bottom: 1rem;">Anunciar Novo Terreno</h3>
-                    <form onsubmit="salvarAnuncio(event)">
+                    <h3 id="form-terreno-titulo">Anunciar Novo Terreno</h3>
+                    <form id="form-anuncio-id" onsubmit="salvarAnuncio(event)">
+                        <input type="hidden" id="id-anuncio">
                         <div class="form-group"><label>Título do Anúncio</label><input type="text" id="tit-anuncio" placeholder="Ex: Fazenda com Mata Nativa Reservada" required></div>
                         <div class="form-group"><label>Preço (R$)</label><input type="text" id="prec-anuncio" placeholder="Ex: R$ 2.500.000" required></div>
                         <div class="form-group"><label>Localização</label><input type="text" id="loc-anuncio" placeholder="Ex: Sorocaba - SP" required></div>
                         <div class="form-group"><label>Tamanho (Hectares)</label><input type="text" id="tam-anuncio" placeholder="Ex: 500 ha" required></div>
                         <div class="form-group"><label>Foto do Terreno</label><input type="file" id="foto-anuncio" accept="image/*" onchange="carregarImagem(event)"></div>
                         <div class="form-group"><label>Descrição</label><textarea id="desc-anuncio" rows="3" placeholder="Detalhes sobre bioma, documentação..." required></textarea></div>
-                        <button type="submit" style="background: var(--primary); color: white; border: none; padding: 0.75rem; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer;">Publicar Anúncio</button>
+                        <button type="submit" id="btn-salvar-texto" style="background: var(--primary); color: white; border: none; padding: 0.75rem; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer;">Publicar Anúncio</button>
+                        <button type="button" id="btn-cancelar-edicao" style="display:none; background: #e2e8f0; color: black; border: none; padding: 0.75rem; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px;" onclick="cancelarEdicao()">Cancelar Edição</button>
                     </form>
                 </div>
             </div>
@@ -495,6 +522,8 @@
 
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        let listaAnunciosLocal = [];
+
         // --- GERENCIADOR DE PÁGINAS ---
         function switchPage(pageId) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
@@ -562,8 +591,8 @@
 
         // --- ANÚNCIOS PADRÃO COM FOTO DE BACKUP ---
         const anunciosPadrao = [
-            { titulo: "Área de Preservação Amazônica", preco: "R$ 5.200.000", loc: "Sinop - MT", tam: "1.100 ha", desc_texto: "Mata nativa intacta com documentação 100% regularizada no CAR e GEO. Pronta para auditoria ambiental.", foto: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=600&q=80" },
-            { titulo: "Gleba para Crédito de Carbono", preco: "R$ 1.980.000", loc: "Formosa - GO", tam: "420 ha", desc_texto: "Bioma Cerrado com alto potencial de retenção de biomassa. Ideal para compensação florestal.", foto: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80" }
+            { id: "p1", titulo: "Área de Preservação Amazônica", preco: "R$ 5.200.000", loc: "Sinop - MT", tam: "1.100 ha", desc_texto: "Mata nativa intacta com documentação 100% regularizada no CAR e GEO. Pronta para auditoria ambiental.", foto: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=600&q=80" },
+            { id: "p2", titulo: "Gleba para Crédito de Carbono", preco: "R$ 1.980.000", loc: "Formosa - GO", tam: "420 ha", desc_texto: "Bioma Cerrado com alto potencial de retenção de biomassa. Ideal para compensação florestal.", foto: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80" }
         ];
 
         // --- RECLAMAÇÕES PADRÃO DE BACKUP ---
@@ -594,14 +623,13 @@
                 if (!error && data) terrenos = data;
             } catch (e) { console.log(e); }
 
-            // Junta os seus novos anúncios salvos no Supabase com os anúncios fictícios originais
-            const listaExibicao = [...terrenos, ...anunciosPadrao];
+            listaAnunciosLocal = [...terrenos, ...anunciosPadrao];
 
             container.innerHTML = "";
-            listaExibicao.forEach(ad => {
+            listaAnunciosLocal.forEach(ad => {
                 let blocoImagem = ad.foto ? `<img src="${ad.foto}" alt="Foto">` : `<div class="sem-foto">🌳<br>Foto não enviada</div>`;
                 container.innerHTML += `
-                    <div class="card-anuncio">
+                    <div class="card-anuncio" id="anuncio-card-${ad.id}">
                         <div class="img-container">${blocoImagem}</div>
                         <div class="card-conteudo">
                             <div>
@@ -610,7 +638,10 @@
                                 <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 0.5rem;">📍 ${ad.loc} • 📏 ${ad.tam}</p>
                                 <p style="font-size: 0.9rem; color: #334155;">${ad.desc_texto}</p>
                             </div>
-                            <button style="margin-top: 1rem; width: 100%; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 5px; cursor: pointer; font-weight: bold;" onclick="alert('Conexão simulada!')">Contatar Vendedor</button>
+                            <div class="acoes-anuncio">
+                                <button class="btn-editar" onclick="prepararEdicao('${ad.id}')">✏️ Editar</button>
+                                <button class="btn-excluir" onclick="excluirAnuncio('${ad.id}')">🗑️ Excluir</button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -619,27 +650,81 @@
 
         async function salvarAnuncio(event) {
             event.preventDefault();
+            const idEdicao = document.getElementById('id-anuncio').value;
+            
             const novoAnuncio = {
                 titulo: document.getElementById('tit-anuncio').value,
                 preco: document.getElementById('prec-anuncio').value,
                 loc: document.getElementById('loc-anuncio').value,
                 tam: document.getElementById('tam-anuncio').value,
-                desc_texto: document.getElementById('desc-anuncio').value,
-                foto: imagemCarregadaBase64
+                desc_texto: document.getElementById('desc-anuncio').value
             };
 
-            try {
-                const { error } = await _supabase.from('terrenos').insert([novoAnuncio]);
-                if (error) { alert("Erro ao salvar: " + error.message); }
-            } catch(e) { alert("Erro de conexão"); }
+            if (imagemCarregadaBase64) {
+                novoAnuncio.foto = imagemCarregadaBase64;
+            }
+
+            if (idEdicao && !idEdicao.startsWith('p')) {
+                // Atualização no Supabase
+                try {
+                    await _supabase.from('terrenos').update(novoAnuncio).eq('id', idEdicao);
+                } catch(e){}
+            } else {
+                // Inserção nova no Supabase
+                try {
+                    if (idEdicao.startsWith('p')) {
+                        novoAnuncio.foto = novoAnuncio.foto || "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=600&q=80";
+                    }
+                    await _supabase.from('terrenos').insert([novoAnuncio]);
+                } catch(e) {}
+            }
             
-            event.target.reset();
-            imagemCarregadaBase64 = "";
+            cancelarEdicao();
             switchSub('compre');
             carregarAnunciosDoBanco();
         }
 
-        // --- RECLAME VERDE COM SUPABASE + BACKUP ---
+        function prepararEdicao(id) {
+            const ad = listaAnunciosLocal.find(item => item.id == id);
+            if (!ad) return;
+
+            document.getElementById('id-anuncio').value = ad.id;
+            document.getElementById('tit-anuncio').value = ad.titulo;
+            document.getElementById('prec-anuncio').value = ad.preco;
+            document.getElementById('loc-anuncio').value = ad.loc;
+            document.getElementById('tam-anuncio').value = ad.tam;
+            document.getElementById('desc-anuncio').value = ad.desc_texto;
+
+            document.getElementById('form-terreno-titulo').innerText = "✏️ Editando Terreno";
+            document.getElementById('btn-salvar-texto').innerText = "Salvar Alterações";
+            document.getElementById('btn-cancelar-edicao').style.display = "block";
+
+            switchSub('anuncie');
+        }
+
+        function cancelarEdicao() {
+            document.getElementById('form-anuncio-id').reset();
+            document.getElementById('id-anuncio').value = "";
+            imagemCarregadaBase64 = "";
+            document.getElementById('form-terreno-titulo').innerText = "Anunciar Novo Terreno";
+            document.getElementById('btn-salvar-texto').innerText = "Publicar Anúncio";
+            document.getElementById('btn-cancelar-edicao').style.display = "none";
+        }
+
+        async function excluirAnuncio(id) {
+            if (confirm("Tem certeza que deseja remover este anúncio de terreno?")) {
+                if (id && !id.toString().startsWith('p')) {
+                    try {
+                        await _supabase.from('terrenos').delete().eq('id', id);
+                    } catch(e){}
+                }
+                // Remove visualmente da tela imediatamente
+                const elemento = document.getElementById(`anuncio-card-${id}`);
+                if (elemento) elemento.remove();
+            }
+        }
+
+        // --- RECLAME VERDE ---
         async function carregarReclamacoesDoBanco() {
             const listContainer = document.getElementById('complaints-list');
             if (!listContainer) return;
@@ -651,9 +736,7 @@
                 if (!error && data) reclamacoes = data;
             } catch(e) { console.log(e); }
 
-            // Sempre exibe as denúncias padrão + o que foi criado online
             const listaExibicao = [...reclamacoes, ...reclamacoesPadrao];
-
             window.todasReclamacoes = listaExibicao; 
             renderizarListaFiltrada(listaExibicao);
         }
@@ -704,7 +787,7 @@
             };
 
             try {
-                const { error } = await _supabase.from('reclamacoes').insert([novaReclamacao]);
+                await _supabase.from('reclamacoes').insert([novaReclamacao]);
             } catch(e) {}
 
             toggleModal(false);
@@ -721,7 +804,7 @@
             else modal.classList.remove('active');
         }
 
-        // Inicialização global ao carregar a página completamente
+        // Inicialização global
         window.onload = function() {
             updateLiveMarketData();
             renderRanking();
